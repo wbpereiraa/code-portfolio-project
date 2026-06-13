@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClassificacaoRiscoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">portfolio</a> &gt; <a href="index.source.html" class="el_package">com.codegroup.portfolio.service</a> &gt; <span class="el_source">ClassificacaoRiscoService.java</span></div><h1>ClassificacaoRiscoService.java</h1><pre class="source lang-java linenums">package com.codegroup.portfolio.service;
+
+import com.codegroup.portfolio.enums.ClassificacaoRisco;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
+/**
+ * Serviço responsável por calcular dinamicamente a classificação de risco
+ * de um projeto com base em orçamento e prazo (em meses).
+ *
+ * Regras:
+ *  - BAIXO:  orçamento &lt;= 100.000 E prazo &lt;= 3 meses
+ *  - MEDIO:  orçamento entre 100.000,01 e 500.000 OU prazo entre 3 e 6 meses (exclusive nos extremos já cobertos)
+ *  - ALTO:   orçamento &gt; 500.000 OU prazo &gt; 6 meses
+ */
+@Service
+<span class="fc" id="L20">public class ClassificacaoRiscoService {</span>
+
+<span class="fc" id="L22">    private static final BigDecimal LIMITE_BAIXO = new BigDecimal(&quot;100000.00&quot;);</span>
+<span class="fc" id="L23">    private static final BigDecimal LIMITE_MEDIO = new BigDecimal(&quot;500000.00&quot;);</span>
+
+    private static final long PRAZO_BAIXO_MESES = 3;
+    private static final long PRAZO_MEDIO_MESES = 6;
+
+    public ClassificacaoRisco calcular(BigDecimal orcamentoTotal, LocalDate dataInicio, LocalDate previsaoTermino) {
+<span class="fc" id="L29">        long prazoEmMeses = calcularPrazoEmMeses(dataInicio, previsaoTermino);</span>
+
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        boolean orcamentoAlto = orcamentoTotal.compareTo(LIMITE_MEDIO) &gt; 0;</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        boolean prazoAlto = prazoEmMeses &gt; PRAZO_MEDIO_MESES;</span>
+
+<span class="fc bfc" id="L34" title="All 4 branches covered.">        if (orcamentoAlto || prazoAlto) {</span>
+<span class="fc" id="L35">            return ClassificacaoRisco.ALTO;</span>
+        }
+
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        boolean orcamentoBaixo = orcamentoTotal.compareTo(LIMITE_BAIXO) &lt;= 0;</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        boolean prazoBaixo = prazoEmMeses &lt;= PRAZO_BAIXO_MESES;</span>
+
+<span class="fc bfc" id="L41" title="All 4 branches covered.">        if (orcamentoBaixo &amp;&amp; prazoBaixo) {</span>
+<span class="fc" id="L42">            return ClassificacaoRisco.BAIXO;</span>
+        }
+
+<span class="fc" id="L45">        return ClassificacaoRisco.MEDIO;</span>
+    }
+
+    private long calcularPrazoEmMeses(LocalDate dataInicio, LocalDate previsaoTermino) {
+<span class="fc" id="L49">        return ChronoUnit.MONTHS.between(dataInicio, previsaoTermino);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

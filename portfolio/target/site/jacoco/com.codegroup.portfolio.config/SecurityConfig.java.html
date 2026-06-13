@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">portfolio</a> &gt; <a href="index.source.html" class="el_package">com.codegroup.portfolio.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.codegroup.portfolio.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+/**
+ * Segurança básica com usuário/senha em memória, conforme exigido pelo desafio.
+ *
+ * Usuário: admin / senha: admin123  -&gt; ROLE_ADMIN (acesso total)
+ * Usuário: user  / senha: user123   -&gt; ROLE_USER  (somente leitura)
+ *
+ * Endpoints do Swagger, da API mockada externa e do H2 (se usado) ficam liberados.
+ */
+@Configuration
+@EnableWebSecurity
+<span class="nc" id="L25">public class SecurityConfig {</span>
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+<span class="nc" id="L29">        return new BCryptPasswordEncoder();</span>
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+<span class="nc" id="L34">        var admin = User.builder()</span>
+<span class="nc" id="L35">                .username(&quot;admin&quot;)</span>
+<span class="nc" id="L36">                .password(passwordEncoder.encode(&quot;admin123&quot;))</span>
+<span class="nc" id="L37">                .roles(&quot;ADMIN&quot;, &quot;USER&quot;)</span>
+<span class="nc" id="L38">                .build();</span>
+
+<span class="nc" id="L40">        var user = User.builder()</span>
+<span class="nc" id="L41">                .username(&quot;user&quot;)</span>
+<span class="nc" id="L42">                .password(passwordEncoder.encode(&quot;user123&quot;))</span>
+<span class="nc" id="L43">                .roles(&quot;USER&quot;)</span>
+<span class="nc" id="L44">                .build();</span>
+
+<span class="nc" id="L46">        return new InMemoryUserDetailsManager(admin, user);</span>
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="nc" id="L51">        http</span>
+<span class="nc" id="L52">                .csrf(csrf -&gt; csrf.disable())</span>
+<span class="nc" id="L53">                .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="nc" id="L54">                .authorizeHttpRequests(auth -&gt; auth</span>
+                        // Documentação e API externa mockada liberadas
+<span class="nc" id="L56">                        .requestMatchers(</span>
+                                &quot;/swagger-ui/**&quot;,
+                                &quot;/v3/api-docs/**&quot;,
+                                &quot;/swagger-ui.html&quot;,
+                                &quot;/external/**&quot;
+<span class="nc" id="L61">                        ).permitAll()</span>
+                        // Leitura liberada para USER e ADMIN
+<span class="nc" id="L63">                        .requestMatchers(org.springframework.http.HttpMethod.GET, &quot;/api/**&quot;).hasAnyRole(&quot;USER&quot;, &quot;ADMIN&quot;)</span>
+                        // Escrita restrita ao ADMIN
+<span class="nc" id="L65">                        .anyRequest().hasRole(&quot;ADMIN&quot;)</span>
+                )
+<span class="nc" id="L67">                .httpBasic(org.springframework.security.config.Customizer.withDefaults());</span>
+
+<span class="nc" id="L69">        return http.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

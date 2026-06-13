@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatusProjeto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">portfolio</a> &gt; <a href="index.source.html" class="el_package">com.codegroup.portfolio.enums</a> &gt; <span class="el_source">StatusProjeto.java</span></div><h1>StatusProjeto.java</h1><pre class="source lang-java linenums">package com.codegroup.portfolio.enums;
+
+import java.util.List;
+
+/**
+ * Status fixos do ciclo de vida do projeto.
+ * A ordem dos valores representa a sequência lógica permitida
+ * (exceto CANCELADO, que pode ser aplicado a qualquer momento).
+ */
+<span class="fc" id="L10">public enum StatusProjeto {</span>
+<span class="fc" id="L11">    EM_ANALISE,</span>
+<span class="fc" id="L12">    ANALISE_REALIZADA,</span>
+<span class="fc" id="L13">    ANALISE_APROVADA,</span>
+<span class="fc" id="L14">    INICIADO,</span>
+<span class="fc" id="L15">    PLANEJADO,</span>
+<span class="fc" id="L16">    EM_ANDAMENTO,</span>
+<span class="fc" id="L17">    ENCERRADO,</span>
+<span class="fc" id="L18">    CANCELADO;</span>
+
+    /**
+     * Verifica se a transição do status atual para o status destino é permitida.
+     * Regras:
+     *  - CANCELADO pode ser aplicado a partir de qualquer status (exceto a partir de ENCERRADO ou CANCELADO).
+     *  - Demais transições devem seguir a sequência lógica (avanço de exatamente uma etapa) ou
+     *    permanecer no mesmo status (sem-op não é considerado uma transição válida de update).
+     */
+    public boolean podeTransicionarPara(StatusProjeto destino) {
+<span class="fc bfc" id="L28" title="All 4 branches covered.">        if (this == ENCERRADO || this == CANCELADO) {</span>
+<span class="fc" id="L29">            return false; // status finais, sem novas transições</span>
+        }
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (destino == CANCELADO) {</span>
+<span class="fc" id="L33">            return true; // cancelamento permitido a qualquer momento (exceto estados finais acima)</span>
+        }
+
+<span class="fc" id="L36">        List&lt;StatusProjeto&gt; sequencia = sequenciaLogica();</span>
+<span class="fc" id="L37">        int posicaoAtual = sequencia.indexOf(this);</span>
+<span class="fc" id="L38">        int posicaoDestino = sequencia.indexOf(destino);</span>
+
+<span class="pc bpc" id="L40" title="2 of 4 branches missed.">        if (posicaoAtual == -1 || posicaoDestino == -1) {</span>
+<span class="nc" id="L41">            return false;</span>
+        }
+
+        // só permite avançar exatamente uma etapa na sequência
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        return posicaoDestino == posicaoAtual + 1;</span>
+    }
+
+    private static List&lt;StatusProjeto&gt; sequenciaLogica() {
+<span class="fc" id="L49">        return List.of(</span>
+                EM_ANALISE,
+                ANALISE_REALIZADA,
+                ANALISE_APROVADA,
+                INICIADO,
+                PLANEJADO,
+                EM_ANDAMENTO,
+                ENCERRADO
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

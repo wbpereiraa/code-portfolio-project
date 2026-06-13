@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MembroExternalClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">portfolio</a> &gt; <a href="index.source.html" class="el_package">com.codegroup.portfolio.client</a> &gt; <span class="el_source">MembroExternalClient.java</span></div><h1>MembroExternalClient.java</h1><pre class="source lang-java linenums">package com.codegroup.portfolio.client;
+
+import com.codegroup.portfolio.dto.MembroDTO;
+import com.codegroup.portfolio.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+
+/**
+ * Cliente responsável por consumir a API REST externa (mockada) de membros.
+ * Toda comunicação com o &quot;serviço de membros&quot; passa por esta classe,
+ * mantendo a integração isolada do restante da aplicação.
+ */
+@Component
+<span class="nc" id="L22">@Slf4j</span>
+public class MembroExternalClient {
+
+    private final RestTemplate restTemplate;
+    private final String baseUrl;
+
+    public MembroExternalClient(RestTemplate restTemplate,
+<span class="nc" id="L29">                                 @Value(&quot;${membros.api.base-url}&quot;) String baseUrl) {</span>
+<span class="nc" id="L30">        this.restTemplate = restTemplate;</span>
+<span class="nc" id="L31">        this.baseUrl = baseUrl;</span>
+<span class="nc" id="L32">    }</span>
+
+    public List&lt;MembroDTO&gt; listarTodos() {
+<span class="nc" id="L35">        MembroDTO[] response = restTemplate.getForObject(baseUrl + &quot;/external/membros&quot;, MembroDTO[].class);</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        return response != null ? List.of(response) : List.of();</span>
+    }
+
+    public MembroDTO buscarPorId(Long id) {
+        try {
+<span class="nc" id="L41">            MembroDTO membro = restTemplate.getForObject(baseUrl + &quot;/external/membros/&quot; + id, MembroDTO.class);</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            if (membro == null) {</span>
+<span class="nc" id="L43">                throw new ResourceNotFoundException(&quot;Membro não encontrado na API externa com id: &quot; + id);</span>
+            }
+<span class="nc" id="L45">            return membro;</span>
+<span class="nc" id="L46">        } catch (HttpClientErrorException.NotFound e) {</span>
+<span class="nc" id="L47">            throw new ResourceNotFoundException(&quot;Membro não encontrado na API externa com id: &quot; + id);</span>
+        }
+    }
+
+    public MembroDTO criar(MembroDTO dto) {
+<span class="nc" id="L52">        HttpEntity&lt;MembroDTO&gt; request = new HttpEntity&lt;&gt;(dto);</span>
+<span class="nc" id="L53">        return restTemplate.exchange(</span>
+                baseUrl + &quot;/external/membros&quot;,
+                HttpMethod.POST,
+                request,
+                MembroDTO.class
+<span class="nc" id="L58">        ).getBody();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
