@@ -59,8 +59,9 @@ public class ProjetoController {
 
     @Operation(summary = "Atualiza apenas o status do projeto, respeitando a sequência lógica permitida")
     @PatchMapping("/{id}/status")
-    public ResponseEntity<ProjetoResponseDTO> atualizarStatus(@PathVariable Long id, @Valid @RequestBody AtualizarStatusDTO dto) {
-        return ResponseEntity.ok(projetoService.atualizarStatus(id, dto));
+    public ResponseEntity<ProjetoResponseDTO> atualizarStatus(@PathVariable Long id,
+                                                              @RequestParam StatusProjeto novoStatus) {
+        return ResponseEntity.ok(projetoService.atualizarStatus(id, new AtualizarStatusDTO(novoStatus)));
     }
 
     @Operation(summary = "Exclui um projeto (não permitido se status for INICIADO, EM_ANDAMENTO ou ENCERRADO)")

@@ -59,15 +59,16 @@ public class ProjetoController {
 
     @Operation(summary = &quot;Atualiza apenas o status do projeto, respeitando a sequência lógica permitida&quot;)
     @PatchMapping(&quot;/{id}/status&quot;)
-    public ResponseEntity&lt;ProjetoResponseDTO&gt; atualizarStatus(@PathVariable Long id, @Valid @RequestBody AtualizarStatusDTO dto) {
-<span class="nc" id="L63">        return ResponseEntity.ok(projetoService.atualizarStatus(id, dto));</span>
+    public ResponseEntity&lt;ProjetoResponseDTO&gt; atualizarStatus(@PathVariable Long id,
+                                                              @RequestParam StatusProjeto novoStatus) {
+<span class="nc" id="L64">        return ResponseEntity.ok(projetoService.atualizarStatus(id, new AtualizarStatusDTO(novoStatus)));</span>
     }
 
     @Operation(summary = &quot;Exclui um projeto (não permitido se status for INICIADO, EM_ANDAMENTO ou ENCERRADO)&quot;)
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deletar(@PathVariable Long id) {
-<span class="nc" id="L69">        projetoService.deletar(id);</span>
-<span class="nc" id="L70">        return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L70">        projetoService.deletar(id);</span>
+<span class="nc" id="L71">        return ResponseEntity.noContent().build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
