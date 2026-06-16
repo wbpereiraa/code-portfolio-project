@@ -20,17 +20,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
-<span class="fc" id="L26">@RequiredArgsConstructor</span>
+<span class="fc" id="L25">@RequiredArgsConstructor</span>
 public class ProjetoService {
 
     private static final int MIN_MEMBROS = 1;
     private static final int MAX_MEMBROS = 10;
     private static final int MAX_PROJETOS_ATIVOS_POR_MEMBRO = 3;
 
-<span class="fc" id="L33">    private static final Set&lt;StatusProjeto&gt; STATUS_IMPEDEM_EXCLUSAO = Set.of(</span>
+<span class="fc" id="L32">    private static final Set&lt;StatusProjeto&gt; STATUS_IMPEDEM_EXCLUSAO = Set.of(</span>
             StatusProjeto.INICIADO, StatusProjeto.EM_ANDAMENTO, StatusProjeto.ENCERRADO
     );
 
@@ -42,126 +41,126 @@ public class ProjetoService {
     public Page&lt;ProjetoResponseDTO&gt; listar(String nome, StatusProjeto status,
                                             LocalDate dataInicioDe, LocalDate dataInicioAte,
                                             Pageable pageable) {
-<span class="nc" id="L45">        var spec = ProjetoSpecification.comFiltros(nome, status, dataInicioDe, dataInicioAte);</span>
-<span class="nc" id="L46">        return projetoRepository.findAll(spec, pageable)</span>
-<span class="nc" id="L47">                .map(this::toResponseDTO);</span>
+<span class="nc" id="L44">        var spec = ProjetoSpecification.comFiltros(nome, status, dataInicioDe, dataInicioAte);</span>
+<span class="nc" id="L45">        return projetoRepository.findAll(spec, pageable)</span>
+<span class="nc" id="L46">                .map(this::toResponseDTO);</span>
     }
 
     @Transactional(readOnly = true)
     public ProjetoResponseDTO buscarPorId(Long id) {
-<span class="nc" id="L52">        Projeto projeto = buscarEntidadePorId(id);</span>
-<span class="nc" id="L53">        return toResponseDTO(projeto);</span>
+<span class="nc" id="L51">        Projeto projeto = buscarEntidadePorId(id);</span>
+<span class="nc" id="L52">        return toResponseDTO(projeto);</span>
     }
 
     @Transactional
     public ProjetoResponseDTO criar(ProjetoRequestDTO dto) {
-<span class="fc" id="L58">        validarDatas(dto.dataInicio(), dto.previsaoTermino(), dto.dataRealTermino());</span>
+<span class="fc" id="L57">        validarDatas(dto.dataInicio(), dto.previsaoTermino(), dto.dataRealTermino());</span>
 
-<span class="fc" id="L60">        Projeto projeto = new Projeto();</span>
-<span class="fc" id="L61">        aplicarDadosBasicos(projeto, dto);</span>
+<span class="fc" id="L59">        Projeto projeto = new Projeto();</span>
+<span class="fc" id="L60">        aplicarDadosBasicos(projeto, dto);</span>
 
-<span class="fc" id="L63">        projeto.setStatus(StatusProjeto.EM_ANALISE);</span>
+<span class="fc" id="L62">        projeto.setStatus(StatusProjeto.EM_ANALISE);</span>
 
-<span class="fc" id="L65">        Membro gerente = membroService.obterMembroSincronizado(dto.gerenteResponsavelId());</span>
-<span class="fc" id="L66">        projeto.setGerenteResponsavel(gerente);</span>
+<span class="fc" id="L64">        Membro gerente = membroService.obterMembroSincronizado(dto.gerenteResponsavelId());</span>
+<span class="fc" id="L65">        projeto.setGerenteResponsavel(gerente);</span>
 
-<span class="fc" id="L68">        List&lt;Membro&gt; membros = resolverEValidarMembros(dto.membrosIds(), null);</span>
-<span class="fc" id="L69">        projeto.setMembros(membros);</span>
+<span class="fc" id="L67">        List&lt;Membro&gt; membros = resolverEValidarMembros(dto.membrosIds(), null);</span>
+<span class="fc" id="L68">        projeto.setMembros(membros);</span>
 
-<span class="fc" id="L71">        Projeto salvo = projetoRepository.save(projeto);</span>
-<span class="fc" id="L72">        return toResponseDTO(salvo);</span>
+<span class="fc" id="L70">        Projeto salvo = projetoRepository.save(projeto);</span>
+<span class="fc" id="L71">        return toResponseDTO(salvo);</span>
     }
 
     @Transactional
     public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
-<span class="nc" id="L77">        Projeto projeto = buscarEntidadePorId(id);</span>
+<span class="nc" id="L76">        Projeto projeto = buscarEntidadePorId(id);</span>
 
-<span class="nc" id="L79">        validarDatas(dto.dataInicio(), dto.previsaoTermino(), dto.dataRealTermino());</span>
+<span class="nc" id="L78">        validarDatas(dto.dataInicio(), dto.previsaoTermino(), dto.dataRealTermino());</span>
 
-<span class="nc" id="L81">        aplicarDadosBasicos(projeto, dto);</span>
+<span class="nc" id="L80">        aplicarDadosBasicos(projeto, dto);</span>
 
-<span class="nc" id="L83">        Membro gerente = membroService.obterMembroSincronizado(dto.gerenteResponsavelId());</span>
-<span class="nc" id="L84">        projeto.setGerenteResponsavel(gerente);</span>
+<span class="nc" id="L82">        Membro gerente = membroService.obterMembroSincronizado(dto.gerenteResponsavelId());</span>
+<span class="nc" id="L83">        projeto.setGerenteResponsavel(gerente);</span>
 
-<span class="nc" id="L86">        List&lt;Membro&gt; membros = resolverEValidarMembros(dto.membrosIds(), projeto.getId());</span>
-<span class="nc" id="L87">        projeto.setMembros(membros);</span>
+<span class="nc" id="L85">        List&lt;Membro&gt; membros = resolverEValidarMembros(dto.membrosIds(), projeto.getId());</span>
+<span class="nc" id="L86">        projeto.setMembros(membros);</span>
 
         // se o DTO trouxer um status diferente do atual, valida a transição
-<span class="nc bnc" id="L90" title="All 4 branches missed.">        if (dto.status() != null &amp;&amp; dto.status() != projeto.getStatus()) {</span>
-<span class="nc" id="L91">            validarTransicaoStatus(projeto.getStatus(), dto.status());</span>
-<span class="nc" id="L92">            projeto.setStatus(dto.status());</span>
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        if (dto.status() != null &amp;&amp; dto.status() != projeto.getStatus()) {</span>
+<span class="nc" id="L90">            validarTransicaoStatus(projeto.getStatus(), dto.status());</span>
+<span class="nc" id="L91">            projeto.setStatus(dto.status());</span>
         }
 
-<span class="nc" id="L95">        Projeto salvo = projetoRepository.save(projeto);</span>
-<span class="nc" id="L96">        return toResponseDTO(salvo);</span>
+<span class="nc" id="L94">        Projeto salvo = projetoRepository.save(projeto);</span>
+<span class="nc" id="L95">        return toResponseDTO(salvo);</span>
     }
 
     @Transactional
     public ProjetoResponseDTO atualizarStatus(Long id, AtualizarStatusDTO dto) {
-<span class="fc" id="L101">        Projeto projeto = buscarEntidadePorId(id);</span>
+<span class="fc" id="L100">        Projeto projeto = buscarEntidadePorId(id);</span>
 
-<span class="fc" id="L103">        validarTransicaoStatus(projeto.getStatus(), dto.novoStatus());</span>
-<span class="fc" id="L104">        projeto.setStatus(dto.novoStatus());</span>
+<span class="fc" id="L102">        validarTransicaoStatus(projeto.getStatus(), dto.novoStatus());</span>
+<span class="fc" id="L103">        projeto.setStatus(dto.novoStatus());</span>
 
-<span class="fc" id="L106">        Projeto salvo = projetoRepository.save(projeto);</span>
-<span class="fc" id="L107">        return toResponseDTO(salvo);</span>
+<span class="fc" id="L105">        Projeto salvo = projetoRepository.save(projeto);</span>
+<span class="fc" id="L106">        return toResponseDTO(salvo);</span>
     }
 
     @Transactional
     public void deletar(Long id) {
-<span class="fc" id="L112">        Projeto projeto = buscarEntidadePorId(id);</span>
+<span class="fc" id="L111">        Projeto projeto = buscarEntidadePorId(id);</span>
 
-<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (STATUS_IMPEDEM_EXCLUSAO.contains(projeto.getStatus())) {</span>
-<span class="fc" id="L115">            throw new BusinessException(</span>
-<span class="fc" id="L116">                    &quot;Projeto com status &quot; + projeto.getStatus() + &quot; não pode ser excluído.&quot;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (STATUS_IMPEDEM_EXCLUSAO.contains(projeto.getStatus())) {</span>
+<span class="fc" id="L114">            throw new BusinessException(</span>
+<span class="fc" id="L115">                    &quot;Projeto com status &quot; + projeto.getStatus() + &quot; não pode ser excluído.&quot;</span>
             );
         }
 
-<span class="fc" id="L120">        projetoRepository.delete(projeto);</span>
-<span class="fc" id="L121">    }</span>
+<span class="fc" id="L119">        projetoRepository.delete(projeto);</span>
+<span class="fc" id="L120">    }</span>
 
     // ---------------------------------------------------------------------
     // Métodos auxiliares
     // ---------------------------------------------------------------------
 
     private Projeto buscarEntidadePorId(Long id) {
-<span class="fc" id="L128">        return projetoRepository.findById(id)</span>
-<span class="fc" id="L129">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Projeto não encontrado com id: &quot; + id));</span>
+<span class="fc" id="L127">        return projetoRepository.findById(id)</span>
+<span class="fc" id="L128">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Projeto não encontrado com id: &quot; + id));</span>
     }
 
     private void aplicarDadosBasicos(Projeto projeto, ProjetoRequestDTO dto) {
-<span class="fc" id="L133">        projeto.setNome(dto.nome());</span>
-<span class="fc" id="L134">        projeto.setDataInicio(dto.dataInicio());</span>
-<span class="fc" id="L135">        projeto.setPrevisaoTermino(dto.previsaoTermino());</span>
-<span class="fc" id="L136">        projeto.setDataRealTermino(dto.dataRealTermino());</span>
-<span class="fc" id="L137">        projeto.setOrcamentoTotal(dto.orcamentoTotal());</span>
-<span class="fc" id="L138">        projeto.setDescricao(dto.descricao());</span>
-<span class="fc" id="L139">    }</span>
+<span class="fc" id="L132">        projeto.setNome(dto.nome());</span>
+<span class="fc" id="L133">        projeto.setDataInicio(dto.dataInicio());</span>
+<span class="fc" id="L134">        projeto.setPrevisaoTermino(dto.previsaoTermino());</span>
+<span class="fc" id="L135">        projeto.setDataRealTermino(dto.dataRealTermino());</span>
+<span class="fc" id="L136">        projeto.setOrcamentoTotal(dto.orcamentoTotal());</span>
+<span class="fc" id="L137">        projeto.setDescricao(dto.descricao());</span>
+<span class="fc" id="L138">    }</span>
 
     private void validarDatas(LocalDate dataInicio, LocalDate previsaoTermino, LocalDate dataRealTermino) {
-<span class="fc bfc" id="L142" title="All 2 branches covered.">        if (previsaoTermino.isBefore(dataInicio)) {</span>
-<span class="fc" id="L143">            throw new BusinessException(&quot;A previsão de término não pode ser anterior à data de início.&quot;);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (previsaoTermino.isBefore(dataInicio)) {</span>
+<span class="fc" id="L142">            throw new BusinessException(&quot;A previsão de término não pode ser anterior à data de início.&quot;);</span>
         }
-<span class="pc bpc" id="L145" title="3 of 4 branches missed.">        if (dataRealTermino != null &amp;&amp; dataRealTermino.isBefore(dataInicio)) {</span>
-<span class="nc" id="L146">            throw new BusinessException(&quot;A data real de término não pode ser anterior à data de início.&quot;);</span>
+<span class="pc bpc" id="L144" title="3 of 4 branches missed.">        if (dataRealTermino != null &amp;&amp; dataRealTermino.isBefore(dataInicio)) {</span>
+<span class="nc" id="L145">            throw new BusinessException(&quot;A data real de término não pode ser anterior à data de início.&quot;);</span>
         }
-<span class="fc" id="L148">    }</span>
+<span class="fc" id="L147">    }</span>
 
     /**
      * Valida a transição de status conforme a sequência lógica definida em
      * {@link StatusProjeto#podeTransicionarPara(StatusProjeto)}.
      */
     private void validarTransicaoStatus(StatusProjeto statusAtual, StatusProjeto novoStatus) {
-<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (statusAtual == novoStatus) {</span>
-<span class="nc" id="L156">            return;</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if (statusAtual == novoStatus) {</span>
+<span class="nc" id="L155">            return;</span>
         }
 
-<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (!statusAtual.podeTransicionarPara(novoStatus)) {</span>
-<span class="fc" id="L160">            throw new BusinessException(</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">        if (!statusAtual.podeTransicionarPara(novoStatus)) {</span>
+<span class="fc" id="L159">            throw new BusinessException(</span>
                     &quot;Transição de status inválida: não é possível ir de &quot; + statusAtual + &quot; para &quot; + novoStatus + &quot;.&quot;
             );
         }
-<span class="fc" id="L164">    }</span>
+<span class="fc" id="L163">    }</span>
 
     /**
      * Resolve a lista de membros a partir dos ids informados, validando:
@@ -172,43 +171,43 @@ public class ProjetoService {
      *    projeto em caso de atualização).
      */
     private List&lt;Membro&gt; resolverEValidarMembros(List&lt;Long&gt; membrosIds, Long projetoIdAtual) {
-<span class="pc bpc" id="L175" title="2 of 6 branches missed.">        if (membrosIds == null || membrosIds.size() &lt; MIN_MEMBROS || membrosIds.size() &gt; MAX_MEMBROS) {</span>
-<span class="fc" id="L176">            throw new BusinessException(</span>
+<span class="pc bpc" id="L174" title="2 of 6 branches missed.">        if (membrosIds == null || membrosIds.size() &lt; MIN_MEMBROS || membrosIds.size() &gt; MAX_MEMBROS) {</span>
+<span class="fc" id="L175">            throw new BusinessException(</span>
                     &quot;O projeto deve ter entre &quot; + MIN_MEMBROS + &quot; e &quot; + MAX_MEMBROS + &quot; membros.&quot;
             );
         }
 
-<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        if (membrosIds.stream().distinct().count() != membrosIds.size()) {</span>
-<span class="nc" id="L182">            throw new BusinessException(&quot;A lista de membros não pode conter ids duplicados.&quot;);</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (membrosIds.stream().distinct().count() != membrosIds.size()) {</span>
+<span class="nc" id="L181">            throw new BusinessException(&quot;A lista de membros não pode conter ids duplicados.&quot;);</span>
         }
 
-<span class="fc" id="L185">        List&lt;Membro&gt; membros = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L184">        List&lt;Membro&gt; membros = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L187" title="All 2 branches covered.">        for (Long membroId : membrosIds) {</span>
-<span class="fc" id="L188">            Membro membro = membroService.obterFuncionarioParaAssociacao(membroId);</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        for (Long membroId : membrosIds) {</span>
+<span class="fc" id="L187">            Membro membro = membroService.obterFuncionarioParaAssociacao(membroId);</span>
 
-<span class="fc" id="L190">            long projetosAtivos = projetoRepository.countProjetosAtivosPorMembro(membro.getId(), projetoIdAtual);</span>
-<span class="fc bfc" id="L191" title="All 2 branches covered.">            if (projetosAtivos &gt;= MAX_PROJETOS_ATIVOS_POR_MEMBRO) {</span>
-<span class="fc" id="L192">                throw new BusinessException(</span>
-<span class="fc" id="L193">                        &quot;Membro '&quot; + membro.getNome() + &quot;' já está alocado em &quot;</span>
+<span class="fc" id="L189">            long projetosAtivos = projetoRepository.countProjetosAtivosPorMembro(membro.getId(), projetoIdAtual);</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">            if (projetosAtivos &gt;= MAX_PROJETOS_ATIVOS_POR_MEMBRO) {</span>
+<span class="fc" id="L191">                throw new BusinessException(</span>
+<span class="fc" id="L192">                        &quot;Membro '&quot; + membro.getNome() + &quot;' já está alocado em &quot;</span>
                                 + MAX_PROJETOS_ATIVOS_POR_MEMBRO
                                 + &quot; projetos ativos (status diferente de ENCERRADO/CANCELADO).&quot;
                 );
             }
 
-<span class="fc" id="L199">            membros.add(membro);</span>
-<span class="fc" id="L200">        }</span>
+<span class="fc" id="L198">            membros.add(membro);</span>
+<span class="fc" id="L199">        }</span>
 
-<span class="fc" id="L202">        return membros;</span>
+<span class="fc" id="L201">        return membros;</span>
     }
 
     private ProjetoResponseDTO toResponseDTO(Projeto projeto) {
-<span class="fc" id="L206">        var classificacao = classificacaoRiscoService.calcular(</span>
-<span class="fc" id="L207">                projeto.getOrcamentoTotal(),</span>
-<span class="fc" id="L208">                projeto.getDataInicio(),</span>
-<span class="fc" id="L209">                projeto.getPrevisaoTermino()</span>
+<span class="fc" id="L205">        var classificacao = classificacaoRiscoService.calcular(</span>
+<span class="fc" id="L206">                projeto.getOrcamentoTotal(),</span>
+<span class="fc" id="L207">                projeto.getDataInicio(),</span>
+<span class="fc" id="L208">                projeto.getPrevisaoTermino()</span>
         );
-<span class="fc" id="L211">        return ProjetoMapper.toResponseDTO(projeto, classificacao);</span>
+<span class="fc" id="L210">        return ProjetoMapper.toResponseDTO(projeto, classificacao);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
