@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:portfolio/target/surefire-reports/2026-06-13T11-36-40_138.dumpstream
-# Created at 2026-06-13T11:36:42.415
-========
-# Created at 2026-06-16T05:09:12.998
->>>>>>>> master:portfolio/target/surefire-reports/2026-06-16T05-09-11_747.dumpstream
+# Created at 2026-06-16T17:00:35.880
 Boot Manifest-JAR contains absolute paths in classpath 'D:\Desktop Atual 2025-2026\Documentos entrevista Dev Java\portfolio\portfolio\target\test-classes'
 Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
 'other' has different root

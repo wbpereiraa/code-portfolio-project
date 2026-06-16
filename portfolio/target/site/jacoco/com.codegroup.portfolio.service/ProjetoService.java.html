@@ -48,8 +48,8 @@ public class ProjetoService {
 
     @Transactional(readOnly = true)
     public ProjetoResponseDTO buscarPorId(Long id) {
-<span class="nc" id="L51">        Projeto projeto = buscarEntidadePorId(id);</span>
-<span class="nc" id="L52">        return toResponseDTO(projeto);</span>
+<span class="fc" id="L51">        Projeto projeto = buscarEntidadePorId(id);</span>
+<span class="fc" id="L52">        return toResponseDTO(projeto);</span>
     }
 
     @Transactional
@@ -73,26 +73,26 @@ public class ProjetoService {
 
     @Transactional
     public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
-<span class="nc" id="L76">        Projeto projeto = buscarEntidadePorId(id);</span>
+<span class="fc" id="L76">        Projeto projeto = buscarEntidadePorId(id);</span>
 
-<span class="nc" id="L78">        validarDatas(dto.dataInicio(), dto.previsaoTermino(), dto.dataRealTermino());</span>
+<span class="fc" id="L78">        validarDatas(dto.dataInicio(), dto.previsaoTermino(), dto.dataRealTermino());</span>
 
-<span class="nc" id="L80">        aplicarDadosBasicos(projeto, dto);</span>
+<span class="fc" id="L80">        aplicarDadosBasicos(projeto, dto);</span>
 
-<span class="nc" id="L82">        Membro gerente = membroService.obterMembroSincronizado(dto.gerenteResponsavelId());</span>
-<span class="nc" id="L83">        projeto.setGerenteResponsavel(gerente);</span>
+<span class="fc" id="L82">        Membro gerente = membroService.obterMembroSincronizado(dto.gerenteResponsavelId());</span>
+<span class="fc" id="L83">        projeto.setGerenteResponsavel(gerente);</span>
 
-<span class="nc" id="L85">        List&lt;Membro&gt; membros = resolverEValidarMembros(dto.membrosIds(), projeto.getId());</span>
-<span class="nc" id="L86">        projeto.setMembros(membros);</span>
+<span class="fc" id="L85">        List&lt;Membro&gt; membros = resolverEValidarMembros(dto.membrosIds(), projeto.getId());</span>
+<span class="fc" id="L86">        projeto.setMembros(membros);</span>
 
         // se o DTO trouxer um status diferente do atual, valida a transição
-<span class="nc bnc" id="L89" title="All 4 branches missed.">        if (dto.status() != null &amp;&amp; dto.status() != projeto.getStatus()) {</span>
-<span class="nc" id="L90">            validarTransicaoStatus(projeto.getStatus(), dto.status());</span>
-<span class="nc" id="L91">            projeto.setStatus(dto.status());</span>
+<span class="pc bpc" id="L89" title="1 of 4 branches missed.">        if (dto.status() != null &amp;&amp; dto.status() != projeto.getStatus()) {</span>
+<span class="fc" id="L90">            validarTransicaoStatus(projeto.getStatus(), dto.status());</span>
+<span class="fc" id="L91">            projeto.setStatus(dto.status());</span>
         }
 
-<span class="nc" id="L94">        Projeto salvo = projetoRepository.save(projeto);</span>
-<span class="nc" id="L95">        return toResponseDTO(salvo);</span>
+<span class="fc" id="L94">        Projeto salvo = projetoRepository.save(projeto);</span>
+<span class="fc" id="L95">        return toResponseDTO(salvo);</span>
     }
 
     @Transactional
@@ -141,8 +141,8 @@ public class ProjetoService {
 <span class="fc bfc" id="L141" title="All 2 branches covered.">        if (previsaoTermino.isBefore(dataInicio)) {</span>
 <span class="fc" id="L142">            throw new BusinessException(&quot;A previsão de término não pode ser anterior à data de início.&quot;);</span>
         }
-<span class="pc bpc" id="L144" title="3 of 4 branches missed.">        if (dataRealTermino != null &amp;&amp; dataRealTermino.isBefore(dataInicio)) {</span>
-<span class="nc" id="L145">            throw new BusinessException(&quot;A data real de término não pode ser anterior à data de início.&quot;);</span>
+<span class="pc bpc" id="L144" title="1 of 4 branches missed.">        if (dataRealTermino != null &amp;&amp; dataRealTermino.isBefore(dataInicio)) {</span>
+<span class="fc" id="L145">            throw new BusinessException(&quot;A data real de término não pode ser anterior à data de início.&quot;);</span>
         }
 <span class="fc" id="L147">    }</span>
 
@@ -151,8 +151,8 @@ public class ProjetoService {
      * {@link StatusProjeto#podeTransicionarPara(StatusProjeto)}.
      */
     private void validarTransicaoStatus(StatusProjeto statusAtual, StatusProjeto novoStatus) {
-<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if (statusAtual == novoStatus) {</span>
-<span class="nc" id="L155">            return;</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (statusAtual == novoStatus) {</span>
+<span class="fc" id="L155">            return;</span>
         }
 
 <span class="fc bfc" id="L158" title="All 2 branches covered.">        if (!statusAtual.podeTransicionarPara(novoStatus)) {</span>
@@ -171,14 +171,14 @@ public class ProjetoService {
      *    projeto em caso de atualização).
      */
     private List&lt;Membro&gt; resolverEValidarMembros(List&lt;Long&gt; membrosIds, Long projetoIdAtual) {
-<span class="pc bpc" id="L174" title="2 of 6 branches missed.">        if (membrosIds == null || membrosIds.size() &lt; MIN_MEMBROS || membrosIds.size() &gt; MAX_MEMBROS) {</span>
+<span class="fc bfc" id="L174" title="All 6 branches covered.">        if (membrosIds == null || membrosIds.size() &lt; MIN_MEMBROS || membrosIds.size() &gt; MAX_MEMBROS) {</span>
 <span class="fc" id="L175">            throw new BusinessException(</span>
                     &quot;O projeto deve ter entre &quot; + MIN_MEMBROS + &quot; e &quot; + MAX_MEMBROS + &quot; membros.&quot;
             );
         }
 
-<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (membrosIds.stream().distinct().count() != membrosIds.size()) {</span>
-<span class="nc" id="L181">            throw new BusinessException(&quot;A lista de membros não pode conter ids duplicados.&quot;);</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if (membrosIds.stream().distinct().count() != membrosIds.size()) {</span>
+<span class="fc" id="L181">            throw new BusinessException(&quot;A lista de membros não pode conter ids duplicados.&quot;);</span>
         }
 
 <span class="fc" id="L184">        List&lt;Membro&gt; membros = new ArrayList&lt;&gt;();</span>

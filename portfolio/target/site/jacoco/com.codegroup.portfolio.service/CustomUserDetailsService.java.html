@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
 
 @Service
-<span class="nc" id="L17">@RequiredArgsConstructor</span>
+<span class="fc" id="L17">@RequiredArgsConstructor</span>
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
@@ -22,19 +22,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-<span class="nc" id="L25">        Usuario usuario = usuarioRepository.findByUsername(username)</span>
-<span class="nc" id="L26">                .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;Usuário não encontrado: &quot; + username));</span>
+<span class="fc" id="L25">        Usuario usuario = usuarioRepository.findByUsername(username)</span>
+<span class="fc" id="L26">                .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;Usuário não encontrado: &quot; + username));</span>
 
-<span class="nc" id="L28">        var authorities = usuario.getRoles().stream()</span>
-<span class="nc" id="L29">                .map(role -&gt; new SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
-<span class="nc" id="L30">                .collect(Collectors.toList());</span>
+<span class="fc" id="L28">        var authorities = usuario.getRoles().stream()</span>
+<span class="fc" id="L29">                .map(role -&gt; new SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
+<span class="fc" id="L30">                .collect(Collectors.toList());</span>
 
-<span class="nc" id="L32">        return User.builder()</span>
-<span class="nc" id="L33">                .username(usuario.getUsername())</span>
-<span class="nc" id="L34">                .password(usuario.getPassword())</span>
-<span class="nc" id="L35">                .authorities(authorities)</span>
-<span class="nc bnc" id="L36" title="All 2 branches missed.">                .disabled(!usuario.isAtivo())</span>
-<span class="nc" id="L37">                .build();</span>
+<span class="fc" id="L32">        return User.builder()</span>
+<span class="fc" id="L33">                .username(usuario.getUsername())</span>
+<span class="fc" id="L34">                .password(usuario.getPassword())</span>
+<span class="fc" id="L35">                .authorities(authorities)</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">                .disabled(!usuario.isAtivo())</span>
+<span class="fc" id="L37">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
