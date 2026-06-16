@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 
 @Service
-<span class="nc" id="L20">@RequiredArgsConstructor</span>
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
 public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
@@ -29,84 +29,84 @@ public class AuthService {
     @Transactional
     public TokenResponseDTO login(LoginRequestDTO dto) {
         try {
-<span class="nc" id="L32">            authenticationManager.authenticate(</span>
-<span class="nc" id="L33">                    new UsernamePasswordAuthenticationToken(dto.username(), dto.password())</span>
+<span class="fc" id="L32">            authenticationManager.authenticate(</span>
+<span class="fc" id="L33">                    new UsernamePasswordAuthenticationToken(dto.username(), dto.password())</span>
             );
-<span class="nc" id="L35">        } catch (AuthenticationException e) {</span>
-<span class="nc" id="L36">            throw new BusinessException(&quot;Credenciais inválidas.&quot;);</span>
-<span class="nc" id="L37">        }</span>
+<span class="fc" id="L35">        } catch (AuthenticationException e) {</span>
+<span class="fc" id="L36">            throw new BusinessException(&quot;Credenciais inválidas.&quot;);</span>
+<span class="fc" id="L37">        }</span>
 
-<span class="nc" id="L39">        Usuario usuario = usuarioRepository.findByUsername(dto.username())</span>
-<span class="nc" id="L40">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Usuário não encontrado.&quot;));</span>
+<span class="fc" id="L39">        Usuario usuario = usuarioRepository.findByUsername(dto.username())</span>
+<span class="pc" id="L40">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Usuário não encontrado.&quot;));</span>
 
-<span class="nc" id="L42">        org.springframework.security.core.userdetails.User userDetails =</span>
+<span class="fc" id="L42">        org.springframework.security.core.userdetails.User userDetails =</span>
                 new org.springframework.security.core.userdetails.User(
-<span class="nc" id="L44">                        usuario.getUsername(),</span>
-<span class="nc" id="L45">                        usuario.getPassword(),</span>
-<span class="nc" id="L46">                        usuario.getRoles().stream()</span>
-<span class="nc" id="L47">                                .map(role -&gt; new org.springframework.security.core.authority.SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
-<span class="nc" id="L48">                                .toList()</span>
+<span class="fc" id="L44">                        usuario.getUsername(),</span>
+<span class="fc" id="L45">                        usuario.getPassword(),</span>
+<span class="fc" id="L46">                        usuario.getRoles().stream()</span>
+<span class="fc" id="L47">                                .map(role -&gt; new org.springframework.security.core.authority.SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
+<span class="fc" id="L48">                                .toList()</span>
                 );
 
-<span class="nc" id="L51">        String accessToken = jwtService.gerarAccessToken(userDetails);</span>
-<span class="nc" id="L52">        RefreshToken refreshToken = refreshTokenService.criar(usuario);</span>
+<span class="fc" id="L51">        String accessToken = jwtService.gerarAccessToken(userDetails);</span>
+<span class="fc" id="L52">        RefreshToken refreshToken = refreshTokenService.criar(usuario);</span>
 
-<span class="nc" id="L54">        return new TokenResponseDTO(</span>
+<span class="fc" id="L54">        return new TokenResponseDTO(</span>
                 accessToken,
-<span class="nc" id="L56">                refreshToken.getToken(),</span>
-<span class="nc" id="L57">                jwtService.getAccessTokenExpirationMs()</span>
+<span class="fc" id="L56">                refreshToken.getToken(),</span>
+<span class="fc" id="L57">                jwtService.getAccessTokenExpirationMs()</span>
         );
     }
 
     @Transactional
     public TokenResponseDTO refresh(RefreshRequestDTO dto) {
-<span class="nc" id="L63">        RefreshToken refreshToken = refreshTokenService.validarEBuscar(dto.refreshToken());</span>
-<span class="nc" id="L64">        Usuario usuario = refreshToken.getUsuario();</span>
+<span class="fc" id="L63">        RefreshToken refreshToken = refreshTokenService.validarEBuscar(dto.refreshToken());</span>
+<span class="fc" id="L64">        Usuario usuario = refreshToken.getUsuario();</span>
 
-<span class="nc" id="L66">        org.springframework.security.core.userdetails.User userDetails =</span>
+<span class="fc" id="L66">        org.springframework.security.core.userdetails.User userDetails =</span>
                 new org.springframework.security.core.userdetails.User(
-<span class="nc" id="L68">                        usuario.getUsername(),</span>
-<span class="nc" id="L69">                        usuario.getPassword(),</span>
-<span class="nc" id="L70">                        usuario.getRoles().stream()</span>
-<span class="nc" id="L71">                                .map(role -&gt; new org.springframework.security.core.authority.SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
-<span class="nc" id="L72">                                .toList()</span>
+<span class="fc" id="L68">                        usuario.getUsername(),</span>
+<span class="fc" id="L69">                        usuario.getPassword(),</span>
+<span class="fc" id="L70">                        usuario.getRoles().stream()</span>
+<span class="fc" id="L71">                                .map(role -&gt; new org.springframework.security.core.authority.SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
+<span class="fc" id="L72">                                .toList()</span>
                 );
 
         // rotação: revoga o refresh token usado e emite um novo
-<span class="nc" id="L76">        String novoAccessToken = jwtService.gerarAccessToken(userDetails);</span>
-<span class="nc" id="L77">        RefreshToken novoRefreshToken = refreshTokenService.criar(usuario);</span>
+<span class="fc" id="L76">        String novoAccessToken = jwtService.gerarAccessToken(userDetails);</span>
+<span class="fc" id="L77">        RefreshToken novoRefreshToken = refreshTokenService.criar(usuario);</span>
 
-<span class="nc" id="L79">        return new TokenResponseDTO(</span>
+<span class="fc" id="L79">        return new TokenResponseDTO(</span>
                 novoAccessToken,
-<span class="nc" id="L81">                novoRefreshToken.getToken(),</span>
-<span class="nc" id="L82">                jwtService.getAccessTokenExpirationMs()</span>
+<span class="fc" id="L81">                novoRefreshToken.getToken(),</span>
+<span class="fc" id="L82">                jwtService.getAccessTokenExpirationMs()</span>
         );
     }
 
     @Transactional
     public void logout(RefreshRequestDTO dto) {
-<span class="nc" id="L88">        RefreshToken refreshToken = refreshTokenService.validarEBuscar(dto.refreshToken());</span>
-<span class="nc" id="L89">        refreshTokenService.revogarPorUsuario(refreshToken.getUsuario());</span>
-<span class="nc" id="L90">    }</span>
+<span class="fc" id="L88">        RefreshToken refreshToken = refreshTokenService.validarEBuscar(dto.refreshToken());</span>
+<span class="fc" id="L89">        refreshTokenService.revogarPorUsuario(refreshToken.getUsuario());</span>
+<span class="fc" id="L90">    }</span>
 
     @Transactional
     public void registrar(RegisterRequestDTO dto) {
-<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (usuarioRepository.existsByUsername(dto.username())) {</span>
-<span class="nc" id="L95">            throw new BusinessException(&quot;Username '&quot; + dto.username() + &quot;' já está em uso.&quot;);</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (usuarioRepository.existsByUsername(dto.username())) {</span>
+<span class="fc" id="L95">            throw new BusinessException(&quot;Username '&quot; + dto.username() + &quot;' já está em uso.&quot;);</span>
         }
 
-<span class="nc bnc" id="L98" title="All 4 branches missed.">        Set&lt;String&gt; roles = (dto.roles() == null || dto.roles().isEmpty())</span>
-<span class="nc" id="L99">                ? Set.of(&quot;USER&quot;)</span>
-<span class="nc" id="L100">                : dto.roles();</span>
+<span class="pc bpc" id="L98" title="1 of 4 branches missed.">        Set&lt;String&gt; roles = (dto.roles() == null || dto.roles().isEmpty())</span>
+<span class="fc" id="L99">                ? Set.of(&quot;USER&quot;)</span>
+<span class="fc" id="L100">                : dto.roles();</span>
 
-<span class="nc" id="L102">        Usuario usuario = Usuario.builder()</span>
-<span class="nc" id="L103">                .username(dto.username())</span>
-<span class="nc" id="L104">                .password(passwordEncoder.encode(dto.password()))</span>
-<span class="nc" id="L105">                .roles(roles)</span>
-<span class="nc" id="L106">                .ativo(true)</span>
-<span class="nc" id="L107">                .build();</span>
+<span class="fc" id="L102">        Usuario usuario = Usuario.builder()</span>
+<span class="fc" id="L103">                .username(dto.username())</span>
+<span class="fc" id="L104">                .password(passwordEncoder.encode(dto.password()))</span>
+<span class="fc" id="L105">                .roles(roles)</span>
+<span class="fc" id="L106">                .ativo(true)</span>
+<span class="fc" id="L107">                .build();</span>
 
-<span class="nc" id="L109">        usuarioRepository.save(usuario);</span>
-<span class="nc" id="L110">    }</span>
+<span class="fc" id="L109">        usuarioRepository.save(usuario);</span>
+<span class="fc" id="L110">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

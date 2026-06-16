@@ -15,61 +15,61 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-<span class="nc" id="L18">@RequiredArgsConstructor</span>
+<span class="fc" id="L18">@RequiredArgsConstructor</span>
 public class RelatorioService {
 
     private final ProjetoRepository projetoRepository;
 
     @Transactional(readOnly = true)
     public RelatorioPortfolioDTO gerarRelatorio() {
-<span class="nc" id="L25">        List&lt;Projeto&gt; todosProjetos = projetoRepository.findAll();</span>
+<span class="fc" id="L25">        List&lt;Projeto&gt; todosProjetos = projetoRepository.findAll();</span>
 
-<span class="nc" id="L27">        Map&lt;StatusProjeto, Long&gt; quantidadePorStatus = new EnumMap&lt;&gt;(StatusProjeto.class);</span>
-<span class="nc" id="L28">        Map&lt;StatusProjeto, BigDecimal&gt; orcamentoPorStatus = new EnumMap&lt;&gt;(StatusProjeto.class);</span>
+<span class="fc" id="L27">        Map&lt;StatusProjeto, Long&gt; quantidadePorStatus = new EnumMap&lt;&gt;(StatusProjeto.class);</span>
+<span class="fc" id="L28">        Map&lt;StatusProjeto, BigDecimal&gt; orcamentoPorStatus = new EnumMap&lt;&gt;(StatusProjeto.class);</span>
 
-<span class="nc bnc" id="L30" title="All 2 branches missed.">        for (StatusProjeto status : StatusProjeto.values()) {</span>
-<span class="nc" id="L31">            quantidadePorStatus.put(status, 0L);</span>
-<span class="nc" id="L32">            orcamentoPorStatus.put(status, BigDecimal.ZERO);</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        for (StatusProjeto status : StatusProjeto.values()) {</span>
+<span class="fc" id="L31">            quantidadePorStatus.put(status, 0L);</span>
+<span class="fc" id="L32">            orcamentoPorStatus.put(status, BigDecimal.ZERO);</span>
         }
 
-<span class="nc bnc" id="L35" title="All 2 branches missed.">        for (Projeto projeto : todosProjetos) {</span>
-<span class="nc" id="L36">            StatusProjeto status = projeto.getStatus();</span>
-<span class="nc" id="L37">            quantidadePorStatus.merge(status, 1L, Long::sum);</span>
-<span class="nc" id="L38">            orcamentoPorStatus.merge(status, projeto.getOrcamentoTotal(), BigDecimal::add);</span>
-<span class="nc" id="L39">        }</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        for (Projeto projeto : todosProjetos) {</span>
+<span class="fc" id="L36">            StatusProjeto status = projeto.getStatus();</span>
+<span class="fc" id="L37">            quantidadePorStatus.merge(status, 1L, Long::sum);</span>
+<span class="fc" id="L38">            orcamentoPorStatus.merge(status, projeto.getOrcamentoTotal(), BigDecimal::add);</span>
+<span class="fc" id="L39">        }</span>
 
-<span class="nc" id="L41">        Double mediaDuracaoEncerrados = calcularMediaDuracaoEncerrados(todosProjetos);</span>
+<span class="fc" id="L41">        Double mediaDuracaoEncerrados = calcularMediaDuracaoEncerrados(todosProjetos);</span>
 
-<span class="nc" id="L43">        long totalMembrosUnicos = todosProjetos.stream()</span>
-<span class="nc" id="L44">                .flatMap(p -&gt; p.getMembros().stream())</span>
-<span class="nc" id="L45">                .map(Membro::getId)</span>
-<span class="nc" id="L46">                .collect(Collectors.toSet())</span>
-<span class="nc" id="L47">                .size();</span>
+<span class="fc" id="L43">        long totalMembrosUnicos = todosProjetos.stream()</span>
+<span class="fc" id="L44">                .flatMap(p -&gt; p.getMembros().stream())</span>
+<span class="fc" id="L45">                .map(Membro::getId)</span>
+<span class="fc" id="L46">                .collect(Collectors.toSet())</span>
+<span class="fc" id="L47">                .size();</span>
 
-<span class="nc" id="L49">        return new RelatorioPortfolioDTO(</span>
+<span class="fc" id="L49">        return new RelatorioPortfolioDTO(</span>
                 quantidadePorStatus,
                 orcamentoPorStatus,
                 mediaDuracaoEncerrados,
-<span class="nc" id="L53">                totalMembrosUnicos</span>
+<span class="fc" id="L53">                totalMembrosUnicos</span>
         );
     }
 
     private Double calcularMediaDuracaoEncerrados(List&lt;Projeto&gt; projetos) {
-<span class="nc" id="L58">        List&lt;Projeto&gt; encerrados = projetos.stream()</span>
-<span class="nc bnc" id="L59" title="All 2 branches missed.">                .filter(p -&gt; p.getStatus() == StatusProjeto.ENCERRADO)</span>
-<span class="nc bnc" id="L60" title="All 2 branches missed.">                .filter(p -&gt; p.getDataRealTermino() != null)</span>
-<span class="nc" id="L61">                .toList();</span>
+<span class="fc" id="L58">        List&lt;Projeto&gt; encerrados = projetos.stream()</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                .filter(p -&gt; p.getStatus() == StatusProjeto.ENCERRADO)</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                .filter(p -&gt; p.getDataRealTermino() != null)</span>
+<span class="fc" id="L61">                .toList();</span>
 
-<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (encerrados.isEmpty()) {</span>
-<span class="nc" id="L64">            return 0.0;</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (encerrados.isEmpty()) {</span>
+<span class="fc" id="L64">            return 0.0;</span>
         }
 
-<span class="nc" id="L67">        double mediaEmDias = encerrados.stream()</span>
-<span class="nc" id="L68">                .mapToLong(p -&gt; ChronoUnit.DAYS.between(p.getDataInicio(), p.getDataRealTermino()))</span>
-<span class="nc" id="L69">                .average()</span>
-<span class="nc" id="L70">                .orElse(0.0);</span>
+<span class="fc" id="L67">        double mediaEmDias = encerrados.stream()</span>
+<span class="fc" id="L68">                .mapToLong(p -&gt; ChronoUnit.DAYS.between(p.getDataInicio(), p.getDataRealTermino()))</span>
+<span class="fc" id="L69">                .average()</span>
+<span class="fc" id="L70">                .orElse(0.0);</span>
 
-<span class="nc" id="L72">        return mediaEmDias;</span>
+<span class="fc" id="L72">        return mediaEmDias;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

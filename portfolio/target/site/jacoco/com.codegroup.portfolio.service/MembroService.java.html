@@ -20,22 +20,22 @@ import java.util.List;
  * relacionamento JPA com Projeto.
  */
 @Service
-<span class="nc" id="L23">@RequiredArgsConstructor</span>
+<span class="fc" id="L23">@RequiredArgsConstructor</span>
 public class MembroService {
 
     private final MembroExternalClient membroExternalClient;
     private final MembroRepository membroRepository;
 
     public List&lt;MembroDTO&gt; listarTodos() {
-<span class="nc" id="L30">        return membroExternalClient.listarTodos();</span>
+<span class="fc" id="L30">        return membroExternalClient.listarTodos();</span>
     }
 
     public MembroDTO buscarPorId(Long id) {
-<span class="nc" id="L34">        return membroExternalClient.buscarPorId(id);</span>
+<span class="fc" id="L34">        return membroExternalClient.buscarPorId(id);</span>
     }
 
     public MembroDTO criar(MembroDTO dto) {
-<span class="nc" id="L38">        return membroExternalClient.criar(dto);</span>
+<span class="fc" id="L38">        return membroExternalClient.criar(dto);</span>
     }
 
     /**
@@ -44,16 +44,16 @@ public class MembroService {
      * no cache local (tabela membro) para o relacionamento JPA.
      */
     public Membro obterFuncionarioParaAssociacao(Long membroId) {
-<span class="nc" id="L47">        MembroDTO membroDTO = membroExternalClient.buscarPorId(membroId);</span>
+<span class="fc" id="L47">        MembroDTO membroDTO = membroExternalClient.buscarPorId(membroId);</span>
 
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (membroDTO.atribuicao() != AtribuicaoMembro.FUNCIONARIO) {</span>
-<span class="nc" id="L50">            throw new BusinessException(</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (membroDTO.atribuicao() != AtribuicaoMembro.FUNCIONARIO) {</span>
+<span class="fc" id="L50">            throw new BusinessException(</span>
                     &quot;Apenas membros com atribuição FUNCIONARIO podem ser associados a projetos. &quot;
-<span class="nc" id="L52">                            + &quot;Membro '&quot; + membroDTO.nome() + &quot;' possui atribuição &quot; + membroDTO.atribuicao()</span>
+<span class="fc" id="L52">                            + &quot;Membro '&quot; + membroDTO.nome() + &quot;' possui atribuição &quot; + membroDTO.atribuicao()</span>
             );
         }
 
-<span class="nc" id="L56">        return sincronizarCacheLocal(membroDTO);</span>
+<span class="fc" id="L56">        return sincronizarCacheLocal(membroDTO);</span>
     }
 
     /**
@@ -61,19 +61,19 @@ public class MembroService {
      * sem restrição de atribuição (usado para o gerente responsável, por exemplo).
      */
     public Membro obterMembroSincronizado(Long membroId) {
-<span class="nc" id="L64">        MembroDTO membroDTO = membroExternalClient.buscarPorId(membroId);</span>
-<span class="nc" id="L65">        return sincronizarCacheLocal(membroDTO);</span>
+<span class="fc" id="L64">        MembroDTO membroDTO = membroExternalClient.buscarPorId(membroId);</span>
+<span class="fc" id="L65">        return sincronizarCacheLocal(membroDTO);</span>
     }
 
     private Membro sincronizarCacheLocal(MembroDTO membroDTO) {
-<span class="nc" id="L69">        Membro membro = MembroMapper.toEntity(membroDTO);</span>
-<span class="nc" id="L70">        return membroRepository.findById(membro.getId())</span>
-<span class="nc" id="L71">                .map(existente -&gt; {</span>
-<span class="nc" id="L72">                    existente.setNome(membro.getNome());</span>
-<span class="nc" id="L73">                    existente.setAtribuicao(membro.getAtribuicao());</span>
-<span class="nc" id="L74">                    return membroRepository.save(existente);</span>
+<span class="fc" id="L69">        Membro membro = MembroMapper.toEntity(membroDTO);</span>
+<span class="fc" id="L70">        return membroRepository.findById(membro.getId())</span>
+<span class="fc" id="L71">                .map(existente -&gt; {</span>
+<span class="fc" id="L72">                    existente.setNome(membro.getNome());</span>
+<span class="fc" id="L73">                    existente.setAtribuicao(membro.getAtribuicao());</span>
+<span class="fc" id="L74">                    return membroRepository.save(existente);</span>
                 })
-<span class="nc" id="L76">                .orElseGet(() -&gt; membroRepository.save(membro));</span>
+<span class="fc" id="L76">                .orElseGet(() -&gt; membroRepository.save(membro));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

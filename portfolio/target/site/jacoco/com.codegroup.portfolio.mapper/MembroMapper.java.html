@@ -9,14 +9,14 @@ public final class MembroMapper {
     }
 
     public static Membro toEntity(MembroDTO dto) {
-<span class="nc bnc" id="L12" title="All 2 branches missed.">        if (dto == null) {</span>
+<span class="pc bpc" id="L12" title="1 of 2 branches missed.">        if (dto == null) {</span>
 <span class="nc" id="L13">            return null;</span>
         }
-<span class="nc" id="L15">        return Membro.builder()</span>
-<span class="nc" id="L16">                .id(dto.id())</span>
-<span class="nc" id="L17">                .nome(dto.nome())</span>
-<span class="nc" id="L18">                .atribuicao(dto.atribuicao())</span>
-<span class="nc" id="L19">                .build();</span>
+<span class="fc" id="L15">        return Membro.builder()</span>
+<span class="fc" id="L16">                .id(dto.id())</span>
+<span class="fc" id="L17">                .nome(dto.nome())</span>
+<span class="fc" id="L18">                .atribuicao(dto.atribuicao())</span>
+<span class="fc" id="L19">                .build();</span>
     }
 
     public static MembroDTO toDTO(Membro entity) {

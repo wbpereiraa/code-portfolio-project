@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.codegroup.portfolio.auth.RefreshTokenServiceTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.900 s -- in com.codegroup.portfolio.auth.RefreshTokenServiceTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.884 s -- in com.codegroup.portfolio.auth.RefreshTokenServiceTest

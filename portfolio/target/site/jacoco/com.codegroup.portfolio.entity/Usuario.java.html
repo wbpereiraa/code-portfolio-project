@@ -11,7 +11,7 @@ import java.util.Set;
 @Entity
 @Table(name = &quot;usuario&quot;)
 <span class="pc bpc" id="L13" title="41 of 42 branches missed.">@Data</span>
-<span class="nc" id="L14">@NoArgsConstructor</span>
+<span class="fc" id="L14">@NoArgsConstructor</span>
 <span class="fc" id="L15">@AllArgsConstructor</span>
 <span class="pc" id="L16">@Builder</span>
 public class Usuario {
@@ -21,16 +21,16 @@ public class Usuario {
 <span class="nc" id="L21">    private Long id;</span>
 
     @Column(unique = true, nullable = false)
-<span class="nc" id="L24">    private String username;</span>
+<span class="fc" id="L24">    private String username;</span>
 
     @Column(nullable = false)
-<span class="nc" id="L27">    private String password;</span>
+<span class="fc" id="L27">    private String password;</span>
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = &quot;usuario_roles&quot;, joinColumns = @JoinColumn(name = &quot;usuario_id&quot;))
     @Column(name = &quot;role&quot;)
-<span class="nc" id="L32">    private Set&lt;String&gt; roles;</span>
+<span class="fc" id="L32">    private Set&lt;String&gt; roles;</span>
 
-<span class="nc" id="L34">    private boolean ativo;</span>
+<span class="fc" id="L34">    private boolean ativo;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
