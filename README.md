@@ -7,14 +7,14 @@ equipe, orçamento e classificação de risco.
 
 - Java 17 + Spring Boot 3.3
 - Spring Data JPA + Hibernate
-- PostgreSQL
+- MySQL
 - Spring Security (usuário/senha em memória)
 - Springdoc OpenAPI (Swagger)
 - JUnit 5 + Mockito + AssertJ + JaCoCo
 
 ## Como executar
 
-1. Crie o banco PostgreSQL:
+1. Crie o banco MySQL:
 ```sql
 CREATE DATABASE portfolio_db;
 ```
