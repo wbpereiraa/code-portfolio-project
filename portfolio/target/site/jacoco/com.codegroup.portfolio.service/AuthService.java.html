@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">portfolio</a> &gt; <a href="index.source.html" class="el_package">com.codegroup.portfolio.service</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package com.codegroup.portfolio.service;
+
+import com.codegroup.portfolio.dto.*;
+import com.codegroup.portfolio.entity.RefreshToken;
+import com.codegroup.portfolio.entity.Usuario;
+import com.codegroup.portfolio.repository.UsuarioRepository;
+import com.codegroup.portfolio.exception.BusinessException;
+import com.codegroup.portfolio.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+
+@Service
+<span class="nc" id="L20">@RequiredArgsConstructor</span>
+public class AuthService {
+
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final AuthenticationManager authenticationManager;
+
+    @Transactional
+    public TokenResponseDTO login(LoginRequestDTO dto) {
+        try {
+<span class="nc" id="L32">            authenticationManager.authenticate(</span>
+<span class="nc" id="L33">                    new UsernamePasswordAuthenticationToken(dto.username(), dto.password())</span>
+            );
+<span class="nc" id="L35">        } catch (AuthenticationException e) {</span>
+<span class="nc" id="L36">            throw new BusinessException(&quot;Credenciais inválidas.&quot;);</span>
+<span class="nc" id="L37">        }</span>
+
+<span class="nc" id="L39">        Usuario usuario = usuarioRepository.findByUsername(dto.username())</span>
+<span class="nc" id="L40">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Usuário não encontrado.&quot;));</span>
+
+<span class="nc" id="L42">        org.springframework.security.core.userdetails.User userDetails =</span>
+                new org.springframework.security.core.userdetails.User(
+<span class="nc" id="L44">                        usuario.getUsername(),</span>
+<span class="nc" id="L45">                        usuario.getPassword(),</span>
+<span class="nc" id="L46">                        usuario.getRoles().stream()</span>
+<span class="nc" id="L47">                                .map(role -&gt; new org.springframework.security.core.authority.SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
+<span class="nc" id="L48">                                .toList()</span>
+                );
+
+<span class="nc" id="L51">        String accessToken = jwtService.gerarAccessToken(userDetails);</span>
+<span class="nc" id="L52">        RefreshToken refreshToken = refreshTokenService.criar(usuario);</span>
+
+<span class="nc" id="L54">        return new TokenResponseDTO(</span>
+                accessToken,
+<span class="nc" id="L56">                refreshToken.getToken(),</span>
+<span class="nc" id="L57">                jwtService.getAccessTokenExpirationMs()</span>
+        );
+    }
+
+    @Transactional
+    public TokenResponseDTO refresh(RefreshRequestDTO dto) {
+<span class="nc" id="L63">        RefreshToken refreshToken = refreshTokenService.validarEBuscar(dto.refreshToken());</span>
+<span class="nc" id="L64">        Usuario usuario = refreshToken.getUsuario();</span>
+
+<span class="nc" id="L66">        org.springframework.security.core.userdetails.User userDetails =</span>
+                new org.springframework.security.core.userdetails.User(
+<span class="nc" id="L68">                        usuario.getUsername(),</span>
+<span class="nc" id="L69">                        usuario.getPassword(),</span>
+<span class="nc" id="L70">                        usuario.getRoles().stream()</span>
+<span class="nc" id="L71">                                .map(role -&gt; new org.springframework.security.core.authority.SimpleGrantedAuthority(&quot;ROLE_&quot; + role))</span>
+<span class="nc" id="L72">                                .toList()</span>
+                );
+
+        // rotação: revoga o refresh token usado e emite um novo
+<span class="nc" id="L76">        String novoAccessToken = jwtService.gerarAccessToken(userDetails);</span>
+<span class="nc" id="L77">        RefreshToken novoRefreshToken = refreshTokenService.criar(usuario);</span>
+
+<span class="nc" id="L79">        return new TokenResponseDTO(</span>
+                novoAccessToken,
+<span class="nc" id="L81">                novoRefreshToken.getToken(),</span>
+<span class="nc" id="L82">                jwtService.getAccessTokenExpirationMs()</span>
+        );
+    }
+
+    @Transactional
+    public void logout(RefreshRequestDTO dto) {
+<span class="nc" id="L88">        RefreshToken refreshToken = refreshTokenService.validarEBuscar(dto.refreshToken());</span>
+<span class="nc" id="L89">        refreshTokenService.revogarPorUsuario(refreshToken.getUsuario());</span>
+<span class="nc" id="L90">    }</span>
+
+    @Transactional
+    public void registrar(RegisterRequestDTO dto) {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (usuarioRepository.existsByUsername(dto.username())) {</span>
+<span class="nc" id="L95">            throw new BusinessException(&quot;Username '&quot; + dto.username() + &quot;' já está em uso.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L98" title="All 4 branches missed.">        Set&lt;String&gt; roles = (dto.roles() == null || dto.roles().isEmpty())</span>
+<span class="nc" id="L99">                ? Set.of(&quot;USER&quot;)</span>
+<span class="nc" id="L100">                : dto.roles();</span>
+
+<span class="nc" id="L102">        Usuario usuario = Usuario.builder()</span>
+<span class="nc" id="L103">                .username(dto.username())</span>
+<span class="nc" id="L104">                .password(passwordEncoder.encode(dto.password()))</span>
+<span class="nc" id="L105">                .roles(roles)</span>
+<span class="nc" id="L106">                .ativo(true)</span>
+<span class="nc" id="L107">                .build();</span>
+
+<span class="nc" id="L109">        usuarioRepository.save(usuario);</span>
+<span class="nc" id="L110">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
