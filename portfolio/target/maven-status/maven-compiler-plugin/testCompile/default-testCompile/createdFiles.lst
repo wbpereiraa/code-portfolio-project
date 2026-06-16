@@ -1,3 +1,5 @@
 com\codegroup\portfolio\service\ClassificacaoRiscoServiceTest.class
 com\codegroup\portfolio\service\ProjetoServiceTest.class
+com\codegroup\portfolio\auth\JwtServiceTest.class
+com\codegroup\portfolio\auth\RefreshTokenServiceTest.class
 com\codegroup\portfolio\enums\StatusProjetoTest.class
