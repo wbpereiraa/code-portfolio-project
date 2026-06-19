@@ -1,9 +1,0 @@
-com\codegroup\portfolio\service\MembroServiceTest.class
-com\codegroup\portfolio\service\ProjetoServiceTest.class
-com\codegroup\portfolio\service\CustomUserDetailsServiceTest.class
-com\codegroup\portfolio\auth\JwtServiceTest.class
-com\codegroup\portfolio\enums\StatusProjetoTest.class
-com\codegroup\portfolio\service\AuthServiceTest.class
-com\codegroup\portfolio\service\ClassificacaoRiscoServiceTest.class
-com\codegroup\portfolio\service\RelatorioServiceTest.class
-com\codegroup\portfolio\auth\RefreshTokenServiceTest.class
