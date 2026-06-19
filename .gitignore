@@ -1,0 +1,14 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Build
+portfolio/target/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+*.env
