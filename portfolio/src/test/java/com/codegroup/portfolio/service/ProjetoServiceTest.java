@@ -10,13 +10,15 @@ import com.codegroup.portfolio.enums.ClassificacaoRisco;
 import com.codegroup.portfolio.enums.StatusProjeto;
 import com.codegroup.portfolio.exception.BusinessException;
 import com.codegroup.portfolio.exception.ResourceNotFoundException;
+import com.codegroup.portfolio.policy.DeletionBlockPolicy;
+import com.codegroup.portfolio.policy.MemberAllocationValidator;
+import com.codegroup.portfolio.policy.StatusTransitionPolicy;
 import com.codegroup.portfolio.repository.ProjetoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,9 +38,6 @@ class ProjetoServiceTest {
     @Mock private ProjetoRepository projetoRepository;
     @Mock private MembroService membroService;
 
-    private ClassificacaoRiscoService classificacaoRiscoService;
-
-    @InjectMocks
     private ProjetoService projetoService;
 
     private Membro gerente;
@@ -47,8 +46,15 @@ class ProjetoServiceTest {
 
     @BeforeEach
     void setUp() {
-        classificacaoRiscoService = new ClassificacaoRiscoService();
-        projetoService = new ProjetoService(projetoRepository, membroService, classificacaoRiscoService);
+        var classificacaoRiscoService = new ClassificacaoRiscoService();
+        var statusTransitionPolicy = new StatusTransitionPolicy();
+        var deletionBlockPolicy = new DeletionBlockPolicy();
+        var memberAllocationValidator = new MemberAllocationValidator(membroService, projetoRepository);
+
+        projetoService = new ProjetoService(
+                projetoRepository, membroService, classificacaoRiscoService,
+                statusTransitionPolicy, deletionBlockPolicy, memberAllocationValidator
+        );
 
         gerente      = new Membro(1L, "Ana Souza",   AtribuicaoMembro.GERENTE);
         funcionario1 = new Membro(2L, "Bruno Lima",  AtribuicaoMembro.FUNCIONARIO);
@@ -63,7 +69,7 @@ class ProjetoServiceTest {
         return new ProjetoRequestDTO(
                 "Sistema de Vendas",
                 LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 4, 1),   // 3 meses → BAIXO (orcamento <= 100k)
+                LocalDate.of(2026, 4, 1),
                 null,
                 new BigDecimal("80000.00"),
                 "Descrição",
@@ -113,7 +119,7 @@ class ProjetoServiceTest {
         ProjetoRequestDTO dto = new ProjetoRequestDTO(
                 "Big Project",
                 LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 10, 1), // 9 meses → ALTO
+                LocalDate.of(2026, 10, 1),
                 null,
                 new BigDecimal("600000.00"),
                 "desc",
@@ -137,7 +143,7 @@ class ProjetoServiceTest {
         ProjetoRequestDTO dto = new ProjetoRequestDTO(
                 "Inválido",
                 LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 1, 1), // antes do início
+                LocalDate.of(2026, 1, 1),
                 null, new BigDecimal("10000"), "desc",
                 gerente.getId(), null, List.of(funcionario1.getId())
         );
@@ -155,7 +161,7 @@ class ProjetoServiceTest {
                 "Inválido",
                 LocalDate.of(2026, 3, 1),
                 LocalDate.of(2026, 6, 1),
-                LocalDate.of(2026, 1, 1), // data real antes do início
+                LocalDate.of(2026, 1, 1),
                 new BigDecimal("10000"), "desc",
                 gerente.getId(), null, List.of(funcionario1.getId())
         );
@@ -302,7 +308,7 @@ class ProjetoServiceTest {
                 "Atualizado",
                 LocalDate.of(2026, 1, 1), LocalDate.of(2026, 4, 1),
                 null, new BigDecimal("80000"), "desc",
-                gerente.getId(), StatusProjeto.ENCERRADO, // pulo inválido
+                gerente.getId(), StatusProjeto.ENCERRADO,
                 List.of(funcionario1.getId())
         );
 
@@ -351,7 +357,7 @@ class ProjetoServiceTest {
         when(projetoRepository.findById(8L)).thenReturn(Optional.of(projeto));
 
         assertThatThrownBy(() -> projetoService.atualizarStatus(8L,
-                new AtualizarStatusDTO(StatusProjeto.INICIADO))) // pula 2 etapas
+                new AtualizarStatusDTO(StatusProjeto.INICIADO)))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Transição de status inválida");
 
@@ -371,12 +377,10 @@ class ProjetoServiceTest {
 
     @Test
     void naoDeveLancarExcecaoQuandoStatusIgualAoAtual() {
-        // mesmo status = no-op permitido (validarTransicaoStatus faz return)
         Projeto projeto = projetoComStatus(9L, StatusProjeto.EM_ANALISE);
         when(projetoRepository.findById(9L)).thenReturn(Optional.of(projeto));
         when(projetoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        // não deve lançar exceção
         ProjetoResponseDTO response = projetoService.atualizarStatus(9L,
                 new AtualizarStatusDTO(StatusProjeto.EM_ANALISE));
 

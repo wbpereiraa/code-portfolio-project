@@ -1,40 +1,50 @@
 # Portfolio API
 
-Sistema de gerenciamento do portfólio de projetos de uma empresa: ciclo de vida completo,
-gerenciamento de equipe, orçamento e classificação de risco dinâmica.
+Sistema de gerenciamento do portfolio de projetos de uma empresa: ciclo de vida
+completo, gerenciamento de equipe, orcamento e classificacao de risco dinamica.
 
 ## Stack
 
 - Java 17 + Spring Boot 3.3
 - Spring Data JPA + Hibernate
-- PostgreSQL
-- Spring Security + JWT (access token + refresh token com rotação automática)
+- PostgreSQL + Flyway (migrations)
+- Spring Security + JWT (access token + refresh token com rotacao automatica)
 - Springdoc OpenAPI (Swagger UI)
 - JUnit 5 + Mockito + AssertJ + JaCoCo
+- Docker + Docker Compose
 
 ---
 
-## Pré-requisitos
+## Como rodar
 
-- JDK 17 ou 21 (não use JDK 24+, incompatível com Lombok)
+### Opcao 1: Docker Compose (recomendado)
+
+```bash
+docker compose up --build
+```
+
+Isso sobe PostgreSQL e a aplicacao automaticamente. Acesse:
+
+- API: http://localhost:8080
+- Swagger: http://localhost:8080/swagger-ui.html
+
+### Opcao 2: Local (sem Docker)
+
+#### Pre-requisitos
+
+- JDK 17 ou 21
 - PostgreSQL rodando localmente
 - Maven 3.8+
 
----
-
-## Configuração
-
-### 1. Banco de dados
-
-Crie o banco no PostgreSQL:
+#### 1. Criar o banco
 
 ```sql
 CREATE DATABASE portfolio_db;
 ```
 
-### 2. application.properties
+#### 2. Configurar credenciais
 
-Ajuste as credenciais em `src/main/resources/application.properties`:
+Ajuste em `portfolio/src/main/resources/application.properties`:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/portfolio_db
@@ -42,45 +52,33 @@ spring.datasource.username=postgres
 spring.datasource.password=postgres
 ```
 
-As propriedades JWT já estão configuradas com valores padrão. Em produção, troque o `jwt.secret`
-por uma string aleatória segura de no mínimo 32 caracteres:
-
-```properties
-jwt.secret=sua-chave-secreta-aqui-minimo-32-chars
-jwt.access-token-expiration-ms=900000
-jwt.refresh-token-expiration-ms=604800000
-```
-
-### 3. IntelliJ — configurações importantes
-
-- `File > Project Structure > Project > SDK` → **JDK 17 ou 21**
-- `Settings > Build > Maven > Runner > JRE` → mesmo JDK 17 ou 21
-- `Settings > Build > Compiler > Annotation Processors` → **Enable annotation processing** marcado
-- Plugin **Lombok** instalado e ativo
-
----
-
-## Executando
+#### 3. Executar
 
 ```bash
-mvn clean package
+cd portfolio
+mvn clean package -DskipTests
 mvn spring-boot:run
 ```
 
-Na primeira inicialização, os usuários padrão são criados automaticamente:
+---
 
-| Usuário | Senha    | Roles       |
+## Usuarios padrao
+
+Na primeira inicializacao, os usuarios padrao sao criados automaticamente:
+
+| Usuario | Senha    | Roles       |
 |---------|----------|-------------|
 | admin   | admin123 | ADMIN, USER |
 | user    | user123  | USER        |
 
 ---
 
-## Autenticação JWT
+## Autenticacao JWT
 
 A API usa **JWT Bearer Token**. O fluxo completo:
 
 ### Login
+
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -92,6 +90,7 @@ Content-Type: application/json
 ```
 
 Resposta:
+
 ```json
 {
   "accessToken": "eyJhbGci...",
@@ -101,12 +100,14 @@ Resposta:
 }
 ```
 
-### Usar o token nas requisições
+### Usar o token nas requisicoes
+
 ```http
 Authorization: Bearer eyJhbGci...
 ```
 
-### Renovar o access token (refresh)
+### Renovar o access token
+
 ```http
 POST /auth/refresh
 Content-Type: application/json
@@ -115,9 +116,9 @@ Content-Type: application/json
   "refreshToken": "550e8400-e29b-..."
 }
 ```
-Retorna um novo par `accessToken` + `refreshToken` (rotação automática — o token anterior é invalidado).
 
 ### Logout
+
 ```http
 POST /auth/logout
 Content-Type: application/json
@@ -127,7 +128,8 @@ Content-Type: application/json
 }
 ```
 
-### Registrar novo usuário (requer role ADMIN)
+### Registrar novo usuario (requer ADMIN)
+
 ```http
 POST /auth/register
 Content-Type: application/json
@@ -139,22 +141,23 @@ Content-Type: application/json
 }
 ```
 
-### Permissões por role
+### Permissoes por role
 
-| Operação                   | USER | ADMIN |
+| Operacao                   | USER | ADMIN |
 |----------------------------|------|-------|
-| GET em qualquer /api/**    | ✅   | ✅    |
-| POST, PUT, PATCH, DELETE   | ❌   | ✅    |
-| /auth/** e /external/**    | ✅   | ✅    |
+| GET em qualquer /api/**    | Sim  | Sim   |
+| POST, PUT, PATCH, DELETE   | Nao  | Sim   |
+| /auth/** e /external/**    | Sim  | Sim   |
 
 ---
 
-## Documentação (Swagger UI)
+## Swagger UI
 
 Acesse: http://localhost:8080/swagger-ui.html
 
 Para autenticar no Swagger:
-1. Faça `POST /auth/login`
+
+1. Faca `POST /auth/login`
 2. Copie o `accessToken`
 3. Clique em **Authorize** (cadeado) e cole o token
 
@@ -162,95 +165,90 @@ Para autenticar no Swagger:
 
 ## Endpoints
 
-### Autenticação (`/auth`)
+### Autenticacao (`/auth`)
 
-| Método | Endpoint        | Descrição                              | Auth   |
+| Metodo | Endpoint        | Descricao                              | Auth   |
 |--------|-----------------|----------------------------------------|--------|
-| POST   | /auth/login     | Login — retorna access + refresh token | Não    |
-| POST   | /auth/refresh   | Renova o access token                  | Não    |
-| POST   | /auth/logout    | Invalida o refresh token               | Não    |
-| POST   | /auth/register  | Cadastra novo usuário                  | ADMIN  |
+| POST   | /auth/login     | Login (retorna access + refresh token) | Nao    |
+| POST   | /auth/refresh   | Renova o access token                  | Nao    |
+| POST   | /auth/logout    | Invalida o refresh token               | Nao    |
+| POST   | /auth/register  | Cadastra novo usuario                  | ADMIN  |
 
 ### Projetos (`/api/projetos`)
 
-| Método | Endpoint                    | Descrição                                         | Auth  |
+| Metodo | Endpoint                    | Descricao                                         | Auth  |
 |--------|-----------------------------|---------------------------------------------------|-------|
 | GET    | /api/projetos               | Lista paginada com filtros                        | USER  |
-| GET    | /api/projetos/{id}          | Busca por id (inclui classificação de risco)      | USER  |
+| GET    | /api/projetos/{id}          | Busca por id (inclui classificacao de risco)      | USER  |
 | POST   | /api/projetos               | Cria projeto (status inicial: EM_ANALISE)         | ADMIN |
 | PUT    | /api/projetos/{id}          | Atualiza dados do projeto                         | ADMIN |
-| PATCH  | /api/projetos/{id}/status   | Atualiza status respeitando sequência lógica      | ADMIN |
+| PATCH  | /api/projetos/{id}/status   | Atualiza status respeitando sequencia logica      | ADMIN |
 | DELETE | /api/projetos/{id}          | Remove projeto (bloqueado em certos status)       | ADMIN |
-
-**Filtros disponíveis no GET /api/projetos:**
-```
-?nome=sistema&status=EM_ANDAMENTO&dataInicioDe=2026-01-01&dataInicioAte=2026-12-31&page=0&size=10&sort=nome,asc
-```
 
 ### Membros (`/api/membros`)
 
-| Método | Endpoint        | Descrição                              | Auth  |
-|--------|-----------------|----------------------------------------|-------|
-| GET    | /api/membros    | Lista membros via API externa mockada  | USER  |
-| GET    | /api/membros/{id} | Busca membro por id                  | USER  |
-| POST   | /api/membros    | Cria membro na API externa             | ADMIN |
+| Metodo | Endpoint          | Descricao                              | Auth  |
+|--------|-----------------  |----------------------------------------|-------|
+| GET    | /api/membros      | Lista membros via API externa mockada  | USER  |
+| GET    | /api/membros/{id} | Busca membro por id                    | USER  |
+| POST   | /api/membros      | Cria membro na API externa             | ADMIN |
 
-### Relatórios (`/api/relatorios`)
+### Relatorios (`/api/relatorios`)
 
-| Método | Endpoint                  | Descrição                     | Auth |
-|--------|---------------------------|-------------------------------|------|
-| GET    | /api/relatorios/portfolio | Relatório resumido do portfólio | USER |
+| Metodo | Endpoint                  | Descricao                       | Auth |
+|--------|---------------------------|---------------------------------|------|
+| GET    | /api/relatorios/portfolio | Relatorio resumido do portfolio | USER |
 
 ### API Externa Mockada (`/external`)
 
-| Método | Endpoint             | Descrição                        | Auth |
-|--------|----------------------|----------------------------------|------|
-| GET    | /external/membros    | Lista membros (mock externo)     | Não  |
-| GET    | /external/membros/{id} | Busca membro por id            | Não  |
-| POST   | /external/membros    | Cria membro no mock externo      | Não  |
+| Metodo | Endpoint               | Descricao                     | Auth |
+|--------|------------------------|-------------------------------|------|
+| GET    | /external/membros      | Lista membros (mock externo)  | Nao  |
+| GET    | /external/membros/{id} | Busca membro por id           | Nao  |
+| POST   | /external/membros      | Cria membro no mock externo   | Nao  |
 
 ---
 
-## Regras de Negócio
+## Regras de Negocio
 
 ### Ciclo de vida do projeto (status)
 
-Sequência obrigatória — não é permitido pular etapas:
+Sequencia obrigatoria (nao e permitido pular etapas):
 
 ```
-EM_ANALISE → ANALISE_REALIZADA → ANALISE_APROVADA → INICIADO → PLANEJADO → EM_ANDAMENTO → ENCERRADO
+EM_ANALISE -> ANALISE_REALIZADA -> ANALISE_APROVADA -> INICIADO -> PLANEJADO -> EM_ANDAMENTO -> ENCERRADO
 ```
 
 `CANCELADO` pode ser aplicado a partir de qualquer status, exceto `ENCERRADO` ou `CANCELADO`.
 
-### Exclusão de projetos
+### Exclusao de projetos
 
-Projetos com status `INICIADO`, `EM_ANDAMENTO` ou `ENCERRADO` **não podem ser excluídos**.
+Projetos com status `INICIADO`, `EM_ANDAMENTO` ou `ENCERRADO` **nao podem ser excluidos**.
 
-### Classificação de risco (calculada dinamicamente)
+### Classificacao de risco (calculada dinamicamente)
 
-| Risco | Orçamento              | Prazo         |
-|-------|------------------------|---------------|
-| BAIXO | até R$ 100.000         | até 3 meses   |
-| MEDIO | R$ 100.001 a R$ 500.000| 3 a 6 meses   |
-| ALTO  | acima de R$ 500.000    | acima de 6 meses |
+| Risco | Orcamento               | Prazo            |
+|-------|-------------------------|------------------|
+| BAIXO | ate R$ 100.000          | ate 3 meses      |
+| MEDIO | R$ 100.001 a R$ 500.000 | 3 a 6 meses     |
+| ALTO  | acima de R$ 500.000     | acima de 6 meses |
 
 ### Membros
 
-- Apenas membros com atribuição `FUNCIONARIO` podem ser associados a projetos
+- Apenas membros com atribuicao `FUNCIONARIO` podem ser associados a projetos
 - Cada projeto deve ter entre **1 e 10 membros**
-- Um membro não pode estar em mais de **3 projetos ativos** simultaneamente (status diferente de `ENCERRADO` ou `CANCELADO`)
+- Um membro nao pode estar em mais de **3 projetos ativos** simultaneamente (status diferente de `ENCERRADO` ou `CANCELADO`)
 
 ### Tokens JWT
 
-- **Access token**: expira em 15 minutos (configurável via `jwt.access-token-expiration-ms`)
-- **Refresh token**: expira em 7 dias (configurável via `jwt.refresh-token-expiration-ms`)
-- **Rotação automática**: ao usar o refresh token, o anterior é revogado e um novo é emitido
-- **Limpeza automática**: tokens expirados/revogados são removidos do banco diariamente à meia-noite
+- **Access token**: expira em 15 minutos (configuravel)
+- **Refresh token**: expira em 7 dias (configuravel)
+- **Rotacao automatica**: ao usar o refresh token, o anterior e revogado e um novo e emitido
+- **Limpeza automatica**: tokens expirados/revogados sao removidos do banco diariamente a meia-noite
 
 ---
 
-## Relatório do Portfólio
+## Relatorio do Portfolio
 
 `GET /api/relatorios/portfolio` retorna:
 
@@ -266,7 +264,7 @@ Projetos com status `INICIADO`, `EM_ANDAMENTO` ou `ENCERRADO` **não podem ser e
     "EM_ANDAMENTO": 500000.00,
     "ENCERRADO": 1200000.00
   },
-  "mediaDuracaoProjetosEncerradosEmDias": 127.5,
+  "mediaDuracaoProjetosEncerradosEmDias": 120.5,
   "totalMembrosUnicosAlocados": 8
 }
 ```
@@ -276,39 +274,60 @@ Projetos com status `INICIADO`, `EM_ANDAMENTO` ou `ENCERRADO` **não podem ser e
 ## Testes
 
 ```bash
-mvn test
+cd portfolio
+mvn clean test
 ```
 
-Relatório de cobertura JaCoCo gerado em `target/site/jacoco/index.html`.
+### Cobertura (JaCoCo)
 
-Cobertura implementada nas principais regras de negócio:
-- `StatusProjetoTest` — valida todas as transições de status permitidas e bloqueadas
-- `ClassificacaoRiscoServiceTest` — valida os três níveis de risco com limites exatos
-- `ProjetoServiceTest` — valida criação, exclusão, transição de status, limite de membros, validação de datas
-- `JwtServiceTest` — valida geração, validação e expiração de tokens
-- `RefreshTokenServiceTest` — valida criação, revogação e expiração de refresh tokens
+```bash
+cd portfolio
+mvn clean verify
+```
+
+O relatorio HTML fica em: `portfolio/target/site/jacoco/index.html`
+
+Meta minima configurada: **70% de cobertura de linha** nas classes de regras de negocio (`service` e `policy`).
 
 ---
 
-## Estrutura do Projeto
+## Arquitetura do projeto
 
 ```
-src/main/java/com/codegroup/portfolio/
-├── auth/
-│   ├── dto/          # LoginRequestDTO, TokenResponseDTO, RefreshRequestDTO, RegisterRequestDTO
-│   ├── entity/       # Usuario, RefreshToken
-│   ├── filter/       # JwtAuthenticationFilter
-│   ├── repository/   # UsuarioRepository, RefreshTokenRepository
-│   ├── service/      # AuthService, JwtService, RefreshTokenService, CustomUserDetailsService
-│   └── AuthController.java
-├── config/           # SecurityConfig, AuthConfig, OpenApiConfig, RestTemplateConfig, DataInitializer
-├── controller/       # ProjetoController, MembroController, RelatorioController, MembroExternalApiMockController
-├── client/           # MembroExternalClient
-├── dto/              # ProjetoRequestDTO, ProjetoResponseDTO, MembroDTO, AtualizarStatusDTO, RelatorioPortfolioDTO
-├── entity/           # Projeto, Membro
-├── enums/            # StatusProjeto, ClassificacaoRisco, AtribuicaoMembro
-├── exception/        # GlobalExceptionHandler, BusinessException, ResourceNotFoundException, ApiError
-├── mapper/           # ProjetoMapper, MembroMapper
-├── repository/       # ProjetoRepository, MembroRepository
-└── service/          # ProjetoService, MembroService, RelatorioService, ClassificacaoRiscoService, ProjetoSpecification
+portfolio/src/main/java/com/codegroup/portfolio/
+  client/          # cliente HTTP para API externa
+  config/          # configuracoes (Security, OpenAPI, Auth, RestTemplate)
+  controller/      # endpoints REST
+  dto/             # DTOs de request/response
+  entity/          # entidades JPA
+  enums/           # enumeracoes (Status, Risco, Atribuicao)
+  exception/       # tratamento global de erros
+  filter/          # filtro JWT
+  mapper/          # conversao entity <-> DTO
+  policy/          # regras de negocio extraidas (status, exclusao, alocacao)
+  repository/      # repositorios JPA
+  service/         # servicos de orquestracao
+```
+
+---
+
+## Docker
+
+### Subir o ambiente completo
+
+```bash
+docker compose up --build
+```
+
+### Parar
+
+```bash
+docker compose down
+```
+
+### Resetar banco
+
+```bash
+docker compose down -v
+docker compose up --build
 ```
